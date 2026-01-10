@@ -58,10 +58,13 @@
 #include "rclcpp_components/node_factory.hpp"
 #include "rclcpp_components/visibility_control.hpp"
 
+namespace rcpputils
+{
 namespace class_loader
 {
 class ClassLoader;
 }  // namespace class_loader
+}  // namespace rcpputils
 
 namespace rclcpp_components
 {
@@ -260,7 +263,7 @@ protected:
   std::weak_ptr<rclcpp::Executor> executor_;
 
   uint64_t unique_id_ {1};
-  std::map<std::string, std::unique_ptr<class_loader::ClassLoader>> loaders_;
+  std::map<std::string, std::unique_ptr<rcpputils::class_loader::ClassLoader>> loaders_;
   std::map<uint64_t, rclcpp_components::NodeInstanceWrapper> node_wrappers_;
 
   rclcpp::Service<LoadNode>::SharedPtr loadNode_srv_;

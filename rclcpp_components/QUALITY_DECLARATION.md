@@ -161,12 +161,6 @@ The `ament_index_cpp` package provides a C++ API to access the ament resource in
 
 It is **Quality Level 1**, see its [Quality Declaration document](https://github.com/ament/ament_index/blob/rolling/ament_index_cpp/QUALITY_DECLARATION.md).
 
-#### `class_loader`
-
-The `class_loader` package provides a ROS-independent package for loading plugins during runtime
-
-It is **Quality Level 1**, see its [Quality Declaration document](https://github.com/ros/class_loader/blob/ros2/QUALITY_DECLARATION.md).
-
 #### `composition_interfaces`
 
 The `composition_interfaces` package contains message and service definitions for managing composable nodes in a container process.

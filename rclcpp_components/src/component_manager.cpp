@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "ament_index_cpp/get_resource.hpp"
-#include "class_loader/class_loader.hpp"
+#include "rcpputils/class_loader.hpp"
 #include "rcpputils/filesystem_helper.hpp"
 #include "rcpputils/split.hpp"
 
@@ -111,11 +111,11 @@ ComponentManager::create_component_factory(const ComponentResource & resource)
   std::string class_name = resource.first;
   std::string fq_class_name = "rclcpp_components::NodeFactoryTemplate<" + class_name + ">";
 
-  class_loader::ClassLoader * loader;
+  rcpputils::class_loader::ClassLoader * loader;
   if (loaders_.find(library_path) == loaders_.end()) {
     RCLCPP_INFO(get_logger(), "Load Library: %s", library_path.c_str());
     try {
-      loaders_[library_path] = std::make_unique<class_loader::ClassLoader>(library_path);
+      loaders_[library_path] = std::make_unique<rcpputils::class_loader::ClassLoader>(library_path);
     } catch (const std::exception & ex) {
       throw ComponentManagerException("Failed to load library: " + std::string(ex.what()));
     } catch (...) {
@@ -124,12 +124,12 @@ ComponentManager::create_component_factory(const ComponentResource & resource)
   }
   loader = loaders_[library_path].get();
 
-  auto classes = loader->getAvailableClasses<rclcpp_components::NodeFactory>();
+  auto classes = loader->get_available_classes<rclcpp_components::NodeFactory>();
   for (const auto & clazz : classes) {
     RCLCPP_INFO(get_logger(), "Found class: %s", clazz.c_str());
     if (clazz == class_name || clazz == fq_class_name) {
       RCLCPP_INFO(get_logger(), "Instantiate class: %s", clazz.c_str());
-      return loader->createInstance<rclcpp_components::NodeFactory>(clazz);
+      return loader->create_shared_instance<rclcpp_components::NodeFactory>(clazz);
     }
   }
   return {};

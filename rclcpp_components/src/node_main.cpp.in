@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-#include "class_loader/class_loader.hpp"
+#include "rcpputils/class_loader.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_components/node_factory.hpp"
 #include "rclcpp_components/node_factory_template.hpp"
@@ -39,8 +39,8 @@ int main(int argc, char * argv[])
   std::string class_name = "rclcpp_components::NodeFactoryTemplate<@component@>";
 
   RCLCPP_DEBUG(logger, "Load library %s", library_name.c_str());
-  auto loader = std::make_unique<class_loader::ClassLoader>(library_name);
-  std::vector<std::string> classes = loader->getAvailableClasses<rclcpp_components::NodeFactory>();
+  auto loader = std::make_unique<rcpputils::class_loader::ClassLoader>(library_name);
+  std::vector<std::string> classes = loader->get_available_classes<rclcpp_components::NodeFactory>();
 
   if (std::find(
     classes.begin(),
@@ -56,7 +56,7 @@ int main(int argc, char * argv[])
   RCLCPP_DEBUG(logger, "Instantiate class %s", class_name.c_str());
   std::shared_ptr<rclcpp_components::NodeFactory> node_factory = nullptr;
   try {
-    node_factory = loader->createInstance<rclcpp_components::NodeFactory>(class_name);
+    node_factory = loader->create_shared_instance<rclcpp_components::NodeFactory>(class_name);
   } catch (const std::exception & ex) {
     RCLCPP_ERROR(logger, "Failed to load library %s", ex.what());
     return 1;

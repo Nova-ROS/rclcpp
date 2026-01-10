@@ -16,7 +16,6 @@ endif()
 
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(class_loader REQUIRED)
 find_package(composition_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rcpputils REQUIRED)
@@ -27,7 +26,6 @@ target_include_directories(component INTERFACE
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_link_libraries(component INTERFACE
-  class_loader::class_loader
   rclcpp::rclcpp)
 
 add_library(
@@ -44,7 +42,6 @@ target_link_libraries(component_manager PUBLIC
 )
 target_link_libraries(component_manager PRIVATE
   ament_index_cpp::ament_index_cpp
-  class_loader::class_loader
   rcpputils::rcpputils
 )
 target_compile_definitions(component_manager
@@ -170,7 +167,6 @@ ament_export_targets(export_${PROJECT_NAME})
 
 # specific order: dependents before dependencies
 ament_export_dependencies(ament_index_cpp)
-ament_export_dependencies(class_loader)
 ament_export_dependencies(composition_interfaces)
 ament_export_dependencies(rclcpp)
 ament_package(CONFIG_EXTRAS rclcpp_components-extras.cmake.in)
