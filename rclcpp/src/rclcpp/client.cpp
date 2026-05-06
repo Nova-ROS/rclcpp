@@ -24,6 +24,7 @@
 #include "rcl/node.h"
 #include "rcl/wait.h"
 
+#include "rclcpp/callback_group.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/node_interfaces/node_base_interface.hpp"
 #include "rclcpp/node_interfaces/node_graph_interface.hpp"
@@ -65,6 +66,32 @@ ClientBase::ClientBase(
       }
       delete client;
     });
+}
+
+ClientBase::~ClientBase()
+{
+  // Clear the callback first to prevent the middleware from invoking it
+  // during/after destruction.
+  clear_on_new_response_callback();
+
+  // Notify the callback group that this client is being destroyed.
+  // Uses try_trigger to avoid blocking/deadlocking if the executor holds the mutex.
+  auto cbg = callback_group_.lock();
+  if (cbg) {
+    cbg->try_trigger_notify_guard_condition();
+  }
+}
+
+void
+ClientBase::set_callback_group(std::weak_ptr<rclcpp::CallbackGroup> callback_group)
+{
+  callback_group_ = callback_group;
+}
+
+std::weak_ptr<rclcpp::CallbackGroup>
+ClientBase::get_callback_group() const
+{
+  return callback_group_;
 }
 
 bool

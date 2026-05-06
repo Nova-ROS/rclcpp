@@ -41,6 +41,9 @@ NodeTimers::add_timer(
   }
   callback_group->add_timer(timer);
 
+  // Store the callback group reference in the timer for destruction notification.
+  timer->set_callback_group(callback_group);
+
   try {
     node_base_->trigger_notify_guard_condition();
     callback_group->trigger_notify_guard_condition();

@@ -49,6 +49,9 @@
 namespace rclcpp
 {
 
+// Forward declaration for callback group association
+class CallbackGroup;
+
 namespace node_interfaces
 {
 class NodeBaseInterface;
@@ -116,6 +119,17 @@ public:
   /// Destructor.
   RCLCPP_PUBLIC
   virtual ~SubscriptionBase();
+
+  /// Set the callback group this subscription belongs to.
+  /// Called by NodeTopics when adding the subscription to a callback group.
+  RCLCPP_PUBLIC
+  void
+  set_callback_group(std::weak_ptr<CallbackGroup> callback_group);
+
+  /// Get the callback group this subscription belongs to (if any).
+  RCLCPP_PUBLIC
+  std::weak_ptr<CallbackGroup>
+  get_callback_group() const;
 
   /// Add event handlers for passed in event_callbacks.
   RCLCPP_PUBLIC
@@ -666,6 +680,10 @@ protected:
   std::shared_ptr<rclcpp::experimental::SubscriptionIntraProcessBase> subscription_intra_process_;
 
   const SubscriptionEventCallbacks event_callbacks_;
+
+  /// Weak pointer to the callback group this subscription belongs to.
+  /// Used to notify the callback group when this subscription is destroyed.
+  std::weak_ptr<CallbackGroup> callback_group_;
 
 private:
   RCLCPP_DISABLE_COPY(SubscriptionBase)

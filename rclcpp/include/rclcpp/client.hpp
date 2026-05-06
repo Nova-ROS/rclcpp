@@ -140,6 +140,9 @@ prune_requests_older_than_impl(
 }
 }  // namespace detail
 
+// Forward declaration for callback group association
+class CallbackGroup;
+
 namespace node_interfaces
 {
 class NodeBaseInterface;
@@ -156,7 +159,17 @@ public:
     rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph);
 
   RCLCPP_PUBLIC
-  virtual ~ClientBase() = default;
+  virtual ~ClientBase();
+
+  /// Set the callback group this client belongs to.
+  RCLCPP_PUBLIC
+  void
+  set_callback_group(std::weak_ptr<CallbackGroup> callback_group);
+
+  /// Get the callback group this client belongs to (if any).
+  RCLCPP_PUBLIC
+  std::weak_ptr<CallbackGroup>
+  get_callback_group() const;
 
   /// Take the next response for this client as a type erased pointer.
   /**
@@ -396,6 +409,9 @@ protected:
   std::shared_ptr<rcl_client_t> client_handle_;
 
   std::atomic<bool> in_use_by_wait_set_{false};
+
+  /// Weak pointer to the callback group this client belongs to.
+  std::weak_ptr<CallbackGroup> callback_group_;
 };
 
 template<typename ServiceT>

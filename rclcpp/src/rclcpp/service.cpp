@@ -21,6 +21,7 @@
 #include <string>
 
 #include "rclcpp/any_service_callback.hpp"
+#include "rclcpp/callback_group.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/qos.hpp"
 #include "rmw/error_handling.h"
@@ -32,6 +33,32 @@ ServiceBase::ServiceBase(std::shared_ptr<rcl_node_t> node_handle)
 : node_handle_(node_handle),
   node_logger_(rclcpp::get_node_logger(node_handle_.get()))
 {}
+
+ServiceBase::~ServiceBase()
+{
+  // Clear the callback first to prevent the middleware from invoking it
+  // during/after destruction.
+  clear_on_new_request_callback();
+
+  // Notify the callback group that this service is being destroyed.
+  // Uses try_trigger to avoid blocking/deadlocking if the executor holds the mutex.
+  auto cbg = callback_group_.lock();
+  if (cbg) {
+    cbg->try_trigger_notify_guard_condition();
+  }
+}
+
+void
+ServiceBase::set_callback_group(std::weak_ptr<rclcpp::CallbackGroup> callback_group)
+{
+  callback_group_ = callback_group;
+}
+
+std::weak_ptr<rclcpp::CallbackGroup>
+ServiceBase::get_callback_group() const
+{
+  return callback_group_;
+}
 
 
 bool

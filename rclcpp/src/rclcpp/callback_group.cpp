@@ -41,7 +41,7 @@ CallbackGroup::CallbackGroup(
 
 CallbackGroup::~CallbackGroup()
 {
-  trigger_notify_guard_condition();
+  try_trigger_notify_guard_condition();
 }
 
 std::atomic_bool &
@@ -148,6 +148,19 @@ CallbackGroup::trigger_notify_guard_condition()
 }
 
 void
+CallbackGroup::try_trigger_notify_guard_condition()
+{
+  std::unique_lock<std::recursive_mutex> lock(notify_guard_condition_mutex_, std::try_to_lock);
+  if (lock.owns_lock() && notify_guard_condition_) {
+    try {
+      notify_guard_condition_->trigger();
+    } catch (...) {
+      // Ignore - executor will detect entity removal on next refresh cycle
+    }
+  }
+}
+
+void
 CallbackGroup::add_subscription(
   const rclcpp::SubscriptionBase::SharedPtr subscription_ptr)
 {
@@ -214,14 +227,85 @@ CallbackGroup::add_waitable(const rclcpp::Waitable::SharedPtr waitable_ptr)
 }
 
 void
-CallbackGroup::remove_waitable(const rclcpp::Waitable::SharedPtr waitable_ptr) noexcept
+CallbackGroup::remove_subscription(
+  const rclcpp::SubscriptionBase::SharedPtr subscription_ptr) noexcept
 {
-  std::lock_guard<std::mutex> lock(mutex_);
-  for (auto iter = waitable_ptrs_.begin(); iter != waitable_ptrs_.end(); ++iter) {
-    const auto shared_ptr = iter->lock();
-    if (shared_ptr.get() == waitable_ptr.get()) {
-      waitable_ptrs_.erase(iter);
-      break;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto iter = subscription_ptrs_.begin(); iter != subscription_ptrs_.end(); ++iter) {
+      const auto shared_ptr = iter->lock();
+      if (shared_ptr.get() == subscription_ptr.get()) {
+        subscription_ptrs_.erase(iter);
+        break;
+      }
     }
   }
+  trigger_notify_guard_condition();
+}
+
+void
+CallbackGroup::remove_service(
+  const rclcpp::ServiceBase::SharedPtr service_ptr) noexcept
+{
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto iter = service_ptrs_.begin(); iter != service_ptrs_.end(); ++iter) {
+      const auto shared_ptr = iter->lock();
+      if (shared_ptr.get() == service_ptr.get()) {
+        service_ptrs_.erase(iter);
+        break;
+      }
+    }
+  }
+  trigger_notify_guard_condition();
+}
+
+void
+CallbackGroup::remove_client(
+  const rclcpp::ClientBase::SharedPtr client_ptr) noexcept
+{
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto iter = client_ptrs_.begin(); iter != client_ptrs_.end(); ++iter) {
+      const auto shared_ptr = iter->lock();
+      if (shared_ptr.get() == client_ptr.get()) {
+        client_ptrs_.erase(iter);
+        break;
+      }
+    }
+  }
+  trigger_notify_guard_condition();
+}
+
+void
+CallbackGroup::remove_timer(
+  const rclcpp::TimerBase::SharedPtr timer_ptr) noexcept
+{
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto iter = timer_ptrs_.begin(); iter != timer_ptrs_.end(); ++iter) {
+      const auto shared_ptr = iter->lock();
+      if (shared_ptr.get() == timer_ptr.get()) {
+        timer_ptrs_.erase(iter);
+        break;
+      }
+    }
+  }
+  trigger_notify_guard_condition();
+}
+
+void
+CallbackGroup::remove_waitable(const rclcpp::Waitable::SharedPtr waitable_ptr) noexcept
+{
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto iter = waitable_ptrs_.begin(); iter != waitable_ptrs_.end(); ++iter) {
+      const auto shared_ptr = iter->lock();
+      if (shared_ptr.get() == waitable_ptr.get()) {
+        waitable_ptrs_.erase(iter);
+        break;
+      }
+    }
+  }
+  trigger_notify_guard_condition();
 }

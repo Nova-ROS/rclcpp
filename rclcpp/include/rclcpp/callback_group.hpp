@@ -263,6 +263,17 @@ public:
   void
   trigger_notify_guard_condition();
 
+  /// Non-blocking attempt to trigger the notify guard condition.
+  /**
+   * Uses try_lock on the internal mutex to avoid blocking or deadlocking
+   * when called from an entity destructor during active spinning.
+   * If the lock cannot be acquired, the trigger is skipped — the executor
+   * will detect the entity removal on its next refresh cycle.
+   */
+  RCLCPP_PUBLIC
+  void
+  try_trigger_notify_guard_condition();
+
 protected:
   RCLCPP_DISABLE_COPY(CallbackGroup)
 
@@ -289,6 +300,22 @@ protected:
   RCLCPP_PUBLIC
   void
   add_waitable(const rclcpp::Waitable::SharedPtr waitable_ptr);
+
+  RCLCPP_PUBLIC
+  void
+  remove_subscription(const rclcpp::SubscriptionBase::SharedPtr subscription_ptr) noexcept;
+
+  RCLCPP_PUBLIC
+  void
+  remove_service(const rclcpp::ServiceBase::SharedPtr service_ptr) noexcept;
+
+  RCLCPP_PUBLIC
+  void
+  remove_client(const rclcpp::ClientBase::SharedPtr client_ptr) noexcept;
+
+  RCLCPP_PUBLIC
+  void
+  remove_timer(const rclcpp::TimerBase::SharedPtr timer_ptr) noexcept;
 
   RCLCPP_PUBLIC
   void

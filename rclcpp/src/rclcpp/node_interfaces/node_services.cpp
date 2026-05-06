@@ -40,6 +40,9 @@ NodeServices::add_service(
 
   group->add_service(service_base_ptr);
 
+  // Store the callback group reference in the service for destruction notification.
+  service_base_ptr->set_callback_group(group);
+
   // Notify the executor that a new service was created using the parent Node.
   try {
     node_base_->trigger_notify_guard_condition();
@@ -64,6 +67,9 @@ NodeServices::add_client(
   }
 
   group->add_client(client_base_ptr);
+
+  // Store the callback group reference in the client for destruction notification.
+  client_base_ptr->set_callback_group(group);
 
   // Notify the executor that a new client was created using the parent Node.
   try {

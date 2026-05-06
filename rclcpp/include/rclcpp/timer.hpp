@@ -50,6 +50,9 @@ struct TimerInfo
   Time actual_call_time;
 };
 
+// Forward declaration for callback group association
+class CallbackGroup;
+
 class TimerBase
 {
 public:
@@ -76,6 +79,16 @@ public:
   RCLCPP_PUBLIC
   virtual
   ~TimerBase();
+
+  /// Set the callback group this timer belongs to.
+  RCLCPP_PUBLIC
+  void
+  set_callback_group(std::weak_ptr<CallbackGroup> callback_group);
+
+  /// Get the callback group this timer belongs to (if any).
+  RCLCPP_PUBLIC
+  std::weak_ptr<CallbackGroup>
+  get_callback_group() const;
 
   /// Cancel the timer.
   /**
@@ -203,6 +216,9 @@ protected:
   std::shared_ptr<rcl_timer_t> timer_handle_;
 
   std::atomic<bool> in_use_by_wait_set_{false};
+
+  /// Weak pointer to the callback group this timer belongs to.
+  std::weak_ptr<CallbackGroup> callback_group_;
 
   RCLCPP_PUBLIC
   void

@@ -48,6 +48,9 @@
 namespace rclcpp
 {
 
+// Forward declaration for callback group association
+class CallbackGroup;
+
 class ServiceBase
 {
 public:
@@ -57,7 +60,17 @@ public:
   explicit ServiceBase(std::shared_ptr<rcl_node_t> node_handle);
 
   RCLCPP_PUBLIC
-  virtual ~ServiceBase() = default;
+  virtual ~ServiceBase();
+
+  /// Set the callback group this service belongs to.
+  RCLCPP_PUBLIC
+  void
+  set_callback_group(std::weak_ptr<CallbackGroup> callback_group);
+
+  /// Get the callback group this service belongs to (if any).
+  RCLCPP_PUBLIC
+  std::weak_ptr<CallbackGroup>
+  get_callback_group() const;
 
   /// Return the name of the service.
   /** \return The name of the service. */
@@ -278,6 +291,9 @@ protected:
   rclcpp::Logger node_logger_;
 
   std::atomic<bool> in_use_by_wait_set_{false};
+
+  /// Weak pointer to the callback group this service belongs to.
+  std::weak_ptr<CallbackGroup> callback_group_;
 };
 
 template<typename ServiceT>

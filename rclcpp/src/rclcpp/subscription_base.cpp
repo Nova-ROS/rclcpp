@@ -22,6 +22,7 @@
 
 #include "rcpputils/scope_exit.hpp"
 
+#include "rclcpp/callback_group.hpp"
 #include "rclcpp/dynamic_typesupport/dynamic_message.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/expand_topic_or_service_name.hpp"
@@ -94,6 +95,18 @@ SubscriptionBase::SubscriptionBase(
 
 SubscriptionBase::~SubscriptionBase()
 {
+  // Clear the on_new_message callback first to prevent the middleware from
+  // invoking it during/after destruction, which can cause deadlocks or UAF.
+  clear_on_new_message_callback();
+
+  // Notify the callback group that this subscription is being destroyed.
+  // This triggers the guard condition so executors can refresh their entity collections.
+  // Uses try_trigger to avoid blocking/deadlocking if the executor holds the mutex.
+  auto cbg = callback_group_.lock();
+  if (cbg) {
+    cbg->try_trigger_notify_guard_condition();
+  }
+
   if (!use_intra_process_) {
     return;
   }
@@ -549,4 +562,16 @@ SubscriptionBase::take_dynamic_message(
 {
   throw std::runtime_error("Unimplemented");
   return false;
+}
+
+void
+SubscriptionBase::set_callback_group(std::weak_ptr<rclcpp::CallbackGroup> callback_group)
+{
+  callback_group_ = callback_group;
+}
+
+std::weak_ptr<rclcpp::CallbackGroup>
+SubscriptionBase::get_callback_group() const
+{
+  return callback_group_;
 }

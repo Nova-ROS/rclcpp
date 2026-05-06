@@ -21,6 +21,7 @@
 
 #include "rmw/impl/cpp/demangle.hpp"
 
+#include "rclcpp/callback_group.hpp"
 #include "rclcpp/contexts/default_context.hpp"
 #include "rclcpp/detail/cpp_callback_trampoline.hpp"
 #include "rclcpp/exceptions.hpp"
@@ -77,6 +78,25 @@ TimerBase::TimerBase(
 TimerBase::~TimerBase()
 {
   clear_on_reset_callback();
+
+  // Notify the callback group that this timer is being destroyed.
+  // Uses try_trigger to avoid blocking/deadlocking if the executor holds the mutex.
+  auto cbg = callback_group_.lock();
+  if (cbg) {
+    cbg->try_trigger_notify_guard_condition();
+  }
+}
+
+void
+TimerBase::set_callback_group(std::weak_ptr<rclcpp::CallbackGroup> callback_group)
+{
+  callback_group_ = callback_group;
+}
+
+std::weak_ptr<rclcpp::CallbackGroup>
+TimerBase::get_callback_group() const
+{
+  return callback_group_;
 }
 
 void

@@ -647,3 +647,31 @@ function(test_subscription_content_filter_for_rmw_implementation)
   endif()
 endfunction()
 call_for_each_rmw_implementation(test_subscription_content_filter_for_rmw_implementation)
+
+# CBG Events Executor tests
+ament_add_gtest(
+  test_cbg_dynamic_lifecycle
+  executors/cbg_dynamic_lifecycle_test.cpp
+  TIMEOUT 120
+)
+if(TARGET test_cbg_dynamic_lifecycle)
+  target_link_libraries(test_cbg_dynamic_lifecycle ${PROJECT_NAME} ${test_msgs_TARGETS})
+endif()
+
+ament_add_gtest(
+  test_cbg_spin_variants
+  executors/cbg_spin_variants_test.cpp
+  TIMEOUT 120
+)
+if(TARGET test_cbg_spin_variants)
+  target_link_libraries(test_cbg_spin_variants ${PROJECT_NAME} ${test_msgs_TARGETS})
+endif()
+
+ament_add_gtest(
+  test_cbg_priority
+  executors/cbg_priority_test.cpp
+  TIMEOUT 120
+)
+if(TARGET test_cbg_priority)
+  target_link_libraries(test_cbg_priority ${PROJECT_NAME} ${test_msgs_TARGETS})
+endif()

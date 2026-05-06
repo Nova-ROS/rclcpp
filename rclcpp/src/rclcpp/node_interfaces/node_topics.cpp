@@ -105,6 +105,9 @@ NodeTopics::add_subscription(
 
   callback_group->add_subscription(subscription);
 
+  // Store the callback group reference in the subscription for destruction notification.
+  subscription->set_callback_group(callback_group);
+
   for (auto & key_event_pair : subscription->get_event_handlers()) {
     auto subscription_event = key_event_pair.second;
     callback_group->add_waitable(subscription_event);
