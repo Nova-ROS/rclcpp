@@ -14,23 +14,13 @@
 
 #include <gtest/gtest.h>
 
-#include <chrono>
 #include <memory>
-#include <string>
-#include <vector>
 
 #include "rclcpp/node.hpp"
 #include "rclcpp/node_options.hpp"
 #include "rclcpp/subscription_options.hpp"
 
 #include "../utils/rclcpp_gtest_macros.hpp"
-
-using namespace std::chrono_literals;
-
-namespace
-{
-constexpr const char defaultPublishTopic[] = "/statistics";
-}
 
 class TestSubscriptionOptions : public ::testing::Test
 {
@@ -54,53 +44,8 @@ protected:
   rclcpp::Node::SharedPtr node;
 };
 
-TEST_F(TestSubscriptionOptions, topic_statistics_options_default_and_set) {
+TEST_F(TestSubscriptionOptions, subscription_options_default) {
   auto options = rclcpp::SubscriptionOptions();
-
-  EXPECT_EQ(options.topic_stats_options.state, rclcpp::TopicStatisticsState::NodeDefault);
-  EXPECT_EQ(options.topic_stats_options.publish_topic, defaultPublishTopic);
-  EXPECT_EQ(options.topic_stats_options.publish_period, 1s);
-  EXPECT_EQ(options.topic_stats_options.qos, rclcpp::SystemDefaultsQoS().keep_last(10));
-
-  options.topic_stats_options.state = rclcpp::TopicStatisticsState::Enable;
-  options.topic_stats_options.publish_topic = "topic_statistics";
-  options.topic_stats_options.publish_period = 5min;
-  options.topic_stats_options.qos = rclcpp::BestAvailableQoS();
-
-  EXPECT_EQ(options.topic_stats_options.state, rclcpp::TopicStatisticsState::Enable);
-  EXPECT_EQ(options.topic_stats_options.publish_topic, "topic_statistics");
-  EXPECT_EQ(options.topic_stats_options.publish_period, 5min);
-  EXPECT_EQ(options.topic_stats_options.qos, rclcpp::BestAvailableQoS());
-}
-
-TEST_F(TestSubscriptionOptions, topic_statistics_options_node_default_mode) {
-  initialize();
-  auto subscription_options = rclcpp::SubscriptionOptions();
-
-  EXPECT_EQ(
-    subscription_options.topic_stats_options.state,
-    rclcpp::TopicStatisticsState::NodeDefault);
-  EXPECT_FALSE(
-    rclcpp::detail::resolve_enable_topic_statistics(
-      subscription_options,
-      *(node->get_node_base_interface())));
-
-  initialize(rclcpp::NodeOptions().enable_topic_statistics(true));
-  EXPECT_TRUE(
-    rclcpp::detail::resolve_enable_topic_statistics(
-      subscription_options,
-      *(node->get_node_base_interface())));
-
-  subscription_options.topic_stats_options.state = rclcpp::TopicStatisticsState::Disable;
-  EXPECT_FALSE(
-    rclcpp::detail::resolve_enable_topic_statistics(
-      subscription_options,
-      *(node->get_node_base_interface())));
-
-  subscription_options.topic_stats_options.state = static_cast<rclcpp::TopicStatisticsState>(5);
-  RCLCPP_EXPECT_THROW_EQ(
-    rclcpp::detail::resolve_enable_topic_statistics(
-      subscription_options,
-      *(node->get_node_base_interface())),
-    std::runtime_error("Unrecognized EnableTopicStatistics value"));
+  EXPECT_TRUE(options.ignore_local_publications == false);
+  EXPECT_TRUE(options.use_default_callbacks == true);
 }

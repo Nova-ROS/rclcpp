@@ -1,6 +1,7 @@
 find_package(ament_cmake_gtest REQUIRED)
 
 find_package(rmw_implementation_cmake REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_definitions(-DTEST_RESOURCES_DIRECTORY="${TEST_RESOURCES_DIRECTORY}")
 
@@ -309,7 +310,7 @@ if(TARGET test_subscription_publisher_with_same_type_adapter)
   target_link_libraries(test_subscription_publisher_with_same_type_adapter
     ${PROJECT_NAME}
     ${cpp_typesupport_target}
-    ${statistics_msgs_TARGETS}
+    ${std_msgs_TARGETS}
   )
 endif()
 
@@ -569,18 +570,6 @@ ament_add_gtest(test_wait_set test_wait_set.cpp
   APPEND_LIBRARY_DIRS "${append_library_dirs}")
 if(TARGET test_wait_set)
   target_link_libraries(test_wait_set ${PROJECT_NAME} ${rcl_interfaces_TARGETS} ${test_msgs_TARGETS})
-endif()
-
-ament_add_gtest(test_subscription_topic_statistics topic_statistics/test_subscription_topic_statistics.cpp
-  APPEND_LIBRARY_DIRS "${append_library_dirs}"
-)
-if(TARGET test_subscription_topic_statistics)
-  target_link_libraries(test_subscription_topic_statistics
-    ${PROJECT_NAME}
-    libstatistics_collector::libstatistics_collector
-    ${statistics_msgs_TARGETS}
-    ${test_msgs_TARGETS}
-  )
 endif()
 
 ament_add_gtest(test_subscription_options test_subscription_options.cpp)

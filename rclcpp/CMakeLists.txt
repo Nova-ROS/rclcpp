@@ -7,7 +7,6 @@ find_package(Threads REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(builtin_interfaces REQUIRED)
-find_package(libstatistics_collector REQUIRED)
 find_package(rcl REQUIRED)
 find_package(rcl_interfaces REQUIRED)
 find_package(rcl_logging_interface REQUIRED)
@@ -21,7 +20,6 @@ find_package(rosidl_runtime_c REQUIRED)
 find_package(rosidl_runtime_cpp REQUIRED)
 find_package(rosidl_typesupport_c REQUIRED)
 find_package(rosidl_typesupport_cpp REQUIRED)
-find_package(statistics_msgs REQUIRED)
 find_package(tracetools REQUIRED)
 
 # TODO(wjwwood): remove this when gtest can build on its own, when using target_compile_features()
@@ -224,7 +222,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_link_libraries(${PROJECT_NAME} PUBLIC
   ${builtin_interfaces_TARGETS}
-  libstatistics_collector::libstatistics_collector
   rcl::rcl
   ${rcl_interfaces_TARGETS}
   rcl_yaml_param_parser::rcl_yaml_param_parser
@@ -236,7 +233,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   rosidl_runtime_c::rosidl_runtime_c
   rosidl_runtime_cpp::rosidl_runtime_cpp
   rosidl_typesupport_cpp::rosidl_typesupport_cpp
-  ${statistics_msgs_TARGETS}
   tracetools::tracetools
   ${CMAKE_THREAD_LIBS_INIT}
 )
@@ -267,7 +263,6 @@ ament_export_targets(${PROJECT_NAME})
 
 ament_export_dependencies(
   builtin_interfaces
-  libstatistics_collector
   rcl
   rcl_interfaces
   rcl_yaml_param_parser
@@ -279,7 +274,6 @@ ament_export_dependencies(
   rosidl_runtime_c
   rosidl_runtime_cpp
   rosidl_typesupport_cpp
-  statistics_msgs
   tracetools
 )
 
